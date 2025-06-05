@@ -57,7 +57,7 @@ if not os.path.exists(output_directory):
 # ch = ConnectionHandler('SLO-EDA-DEVSQL1','TSR_Cleanup') # Commented out for CSV development
 # conn = ch.conn() # Commented out for CSV development
 
-pd.set_option('future.no_silent_downcasting', True)
+# pd.set_option('future.no_silent_downcasting', True) # Commented out to fix OptionError
 
 # with conn: # Commented out for CSV development
     # if truncate_verification_table: # Commented out for CSV development
@@ -122,7 +122,7 @@ for csv_file_path in csv_files_to_run: # Loop through CSV files
             validation_table_fields = primary_key
             base_fields = primary_key
 
-        def_country_field = tables[output_file_name]['default_country_field']
+        def_country_field_value = tables[output_file_name]['default_country_field']
         def_country_code = tables[output_file_name]['default_country_code']
         hasAddress = tables[output_file_name]['address']['hasAddress']
         phone = tables[output_file_name]['phone']
@@ -369,18 +369,29 @@ for csv_file_path in csv_files_to_run: # Loop through CSV files
             validation_table_fields = validation_table_fields + [p for p in phone if p in table.columns]
 
 
-            country_col_name = def_country_field
-            if country_col_name and country_col_name in table.columns:
-                phone_country_col = country_col_name
-                if country_col_name not in phone_all: phone_all.append(country_col_name)
-                if country_col_name not in validation_table_fields: validation_table_fields.append(country_col_name)
+            # country_col_name = def_country_field # Original problematic line
+            # Ensure country_col_name is a string
+            raw_country_col = tables[output_file_name]['default_country_field']
+            country_col_name_str = None
+            if isinstance(raw_country_col, list):
+                if raw_country_col and raw_country_col != [None]: # Check if list is not empty or just [None]
+                    country_col_name_str = raw_country_col[0] # Take the first element
+            elif isinstance(raw_country_col, str):
+                country_col_name_str = raw_country_col # It's already a string
+            
+            # Fallback to default country code if country_col_name_str is None or not in table
+            if country_col_name_str and country_col_name_str in table.columns:
+                phone_country_col = country_col_name_str
+                if country_col_name_str not in phone_all: phone_all.append(country_col_name_str)
+                if country_col_name_str not in validation_table_fields: validation_table_fields.append(country_col_name_str)
             else:
-                country_col_name = 'DCountry' # Default if not specified or not exists
-                table[country_col_name] = def_country_code if def_country_code else 'US' # Use default code or 'US'
-                phone_country_col = country_col_name
-                if country_col_name not in phone_all: phone_all.append(country_col_name)
-                if country_col_name not in validation_table_fields: validation_table_fields.append(country_col_name)
-                country_dict = {country_col_name:'sa.String(100)'} # Still for dataTypeDict, though it's minimally used
+                # If specific country column is not found or not specified, create a default one
+                default_country_column_label = 'DCountry' # Default column name if actual is not found/specified
+                table[default_country_column_label] = tables[output_file_name]['default_country_code'] if tables[output_file_name]['default_country_code'] else 'US'
+                phone_country_col = default_country_column_label
+                if default_country_column_label not in phone_all: phone_all.append(default_country_column_label)
+                if default_country_column_label not in validation_table_fields: validation_table_fields.append(default_country_column_label)
+                country_dict = {default_country_column_label:'sa.String(100)'} 
                 dataTypeDict = dataTypeDict | country_dict
 
 

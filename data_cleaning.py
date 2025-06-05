@@ -11,7 +11,7 @@ from fuzzy_scores import compare_score, get_score
 def address_cleaning(fullAddress, address1, address2, address3, city, state, zip, country_code):
 
     ############ TEST IF FULL ADDRESS CAN BE PARSED ###############
-    if fullAddress == None or np.isnan(fullAddress):
+    if pd.isnull(fullAddress):
         if pd.isnull(address3) and pd.notnull(address2):
             fulladdress_assembled = f'{address1} {address2} {city}, {state} {zip} {country_code}'
         elif pd.notnull(address3):
@@ -86,7 +86,7 @@ def address_cleaning(fullAddress, address1, address2, address3, city, state, zip
         postal_code = zip
         country = country_code
     else:
-        street = f'{address_dict['street_number']} {address_dict['street_name']} {address_dict['street_type']}'
+        street = f'{address_dict["street_number"]} {address_dict["street_name"]} {address_dict["street_type"]}'
         suite = address_dict['occupancy'] or address_dict['building_id'] 
         city = address_dict['city']
         state = address_dict['region1']
@@ -190,23 +190,36 @@ def address_cleaning(fullAddress, address1, address2, address3, city, state, zip
         bad_data.append('Reformatted City with Zip')
 
     elif city != None and state != None and postal_code != None and check_city != None:
-        city_text = city.lower()
-        check_city_text = check_city.lower()
+        city_text = str(city).lower()
+        check_city_text = str(check_city).lower()
         if check_city_text != city_text:
             city = check_city
             bad_data.append('City spelling reformatted')
     
-    if city != None and len(city) > 3:
+    if isinstance(city, str) and len(city) > 3:
         city = Title(city).to_title().strip()
 
     if address_dict:
+        s_street = str(street) if pd.notnull(street) else ""
+        s_suite = str(suite) if pd.notnull(suite) else ""
+        s_city = str(city) if pd.notnull(city) else ""
+        s_state = str(state) if pd.notnull(state) else ""
+        s_postal_code = str(postal_code) if pd.notnull(postal_code) else ""
+        s_country = str(country_code) if pd.notnull(country_code) else ""
+        s_address1 = str(address1) if pd.notnull(address1) else ""
+
         if pd.notnull(suite):
-            address_reassembled = f'{street} {suite} {city}, {state} {postal_code} {country}'
+            address_reassembled = f'{s_street} {s_suite} {s_city}, {s_state} {s_postal_code} {s_country}'
         else:
-            address_reassembled = f'{address1} {city}, {state} {zip} {country_code}'
+            address_reassembled = f'{s_address1} {s_city}, {s_state} {s_postal_code} {s_country}'
     
     if None not in (street, city, state, postal_code):
-        formatted_full_address = f'{street} {city} {state} {postal_code[:5]}'
+        s_street = str(street) if pd.notnull(street) else ""
+        s_city = str(city) if pd.notnull(city) else ""
+        s_state = str(state) if pd.notnull(state) else ""
+        s_postal_code = str(postal_code)[:5] if pd.notnull(postal_code) and isinstance(postal_code, str) else (str(postal_code)[:5] if pd.notnull(postal_code) else "")
+
+        formatted_full_address = f'{s_street} {s_city} {s_state} {s_postal_code}'
         formatted_full_address = re.sub(r'[^A-Za-z0-9 ]+', '', formatted_full_address).strip().lower()
     else: 
         formatted_full_address = None

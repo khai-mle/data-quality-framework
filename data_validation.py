@@ -333,7 +333,10 @@ class Title:
 
 class Website:
     def __init__(self,  website):
-        self.website = website
+        if not isinstance(website, str):
+            self.website = ''
+        else:
+            self.website = website
 
     def website_check(self):
         result = urlparse(self.website)
