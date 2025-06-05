@@ -8,7 +8,7 @@ tpdb_company, snow_contact, snow_company, snow_account, ns_customers, \
 ns_contacts, tpdb_company_source_sys_type, customer_cols, mdm_customer__active, \
 mdm_contact__active, mdm_customer__active_view, mdm_contact__active_view, \
 non_closedwon_address_phone_email_view, non_closedwon_addresses_view,\
-hubspot
+hubspot, logistics_dqpilot_contact
 
 tables = {
     "template":mapping_template,
@@ -36,7 +36,8 @@ tables = {
     "MDM_Customer__Active_View":mdm_customer__active_view,
     "Non_ClosedWon_Address_Phone_and_Email_View":non_closedwon_address_phone_email_view,
     "Non_Customer_Addresses_View": non_closedwon_addresses_view,
-    "Hubspot":hubspot
+    "Hubspot":hubspot,
+    "Logistics_DQPilot_CONTACT": logistics_dqpilot_contact
     }
 
 ods_tables = {
@@ -65,5 +66,6 @@ ods_tables = {
     "MDM_Customer__Active_View":"vw__TSR_Cleanup_Feeder__MDM_Customer__Active",
     "Non_ClosedWon_Address_Phone_and_Email_View":"vw__TSR_Cleanup_Feeder__Non_ClosedWon_Address_Phone_and_Email",
     "Non_Customer_Addresses_View": "vw__TSR_Cleanup_Feeder__Non_Customer_Addresses",
-    "hubspot-crm-exports-all-companies-2024-06-11.xlsx":"Hubspot"
+    "hubspot-crm-exports-all-companies-2024-06-11.xlsx":"Hubspot",
+    "Logistics_DQPilot_CONTACT.csv":"Logistics_DQPilot_CONTACT"
     }
