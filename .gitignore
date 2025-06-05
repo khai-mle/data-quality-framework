@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+pip-wheel-metadata/
+dist/
+build/
+wheels/
+*.tar.gz
+*.whl
+
+# Virtual Environments
+env/
+venv/
+ENV/
+VENV/
+.env
+.venv
+PYTHON_ENV/
+
+# IDE and editor specific files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.DS_Store
+Thumbs.db
+
+# Generated output directories - Framework specific
+output_files/
+html_output_files/
+
+# Log files
+*.log
+logs/
+
+# Data files - Add your specific large/sensitive CSV data files here
+# These should not be committed to the repository.
+# Provide sample/anonymized versions in a 'sample_data/' directory if needed.
+Logistics_DQPilot_CONTACT.csv
+Logistics_DQPilotACCOUNT.csv
+# data/ # If you create a general 'data' directory for untracked data
+
+# Temporary files
+*.tmp
+*.bak
+
+# Coverage reports
+coverage.xml
+.coverage
+
+Frequency?.txt
+Describe?.csv
+Great?.csv
+Great?.txt
+?.html
+?.xlsx
+?.xls

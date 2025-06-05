@@ -1,0 +1,80 @@
+From Desktop Installer:
+
+    Download Microsoft Sequel Server Management Studio:
+    Ensure Access to Servers:
+    STL00-BISQL02
+    SLO-EDA-DEVSQL1
+    SLO-EDA-PRDSQL1
+
+    Download Python 3.12
+    To Install Python Libraries:
+    Go to cmd line:
+        pip install pandas numpy scipy pyodbc ydata_profiling setuptools maskpass sqlalchemy pyzipcode phonenumbers email-validator pyap fuzzywuzzy python-Levenshtein openpyxl
+
+    Download Visual Studio Code:
+    follow instruction for optimized experience
+    https://learn.microsoft.com/en-us/visualstudio/python/tutorial-working-with-python-in-visual-studio-step-05-installing-packages?view=vs-2022
+
+Download ODBC Driver:
+https://go.microsoft.com/fwlink/?linkid=2266337
+
+Install Git:
+https://github.com/git-guides/install-git
+
+Get Access to GitLab:
+https://gitrepo.tierpoint.com/EDA-DataQuality-Framework/eda-dataquality-framework
+    get Access to:
+    EDA-DataQuality-Framework
+
+Set Up SSH Key:
+    Set up SSH Key
+    go to the cmd line
+    check if you have ssh generation
+    ssh -V
+
+    if you do, run this command
+    ssh-keygen -t rsa -b 2048 -C "EDA-DataQuality-Framework RSA Key"
+
+    go to https://gitrepo.tierpoint.com/-/profile/keys
+    copy and paste contents of your .pub file (your public key) to gitlab under the add an SSH key
+
+clone the repo from the command line:
+    git init
+    git clone https://gitrepo.tierpoint.com/EDA-DataQuality-Framework/eda-dataquality-framework.git
+
+
+Using Git:
+    git init
+    git clone git.repository
+
+    To Get a branch or repo:
+    git pull <branch> or <main>
+
+    To add changes to a branch:
+    git add .
+    git commit -m "type your message here"
+    git push origin <branch>
+
+    To create a branch:
+    git checkout -b <branch>
+
+#### WARNING ####
+Do NOT use any programs with SQLite depencencies. It will cause windows authentication to fail
+because SQLite requires a cursor and the certificate will try to apply to SQLite databases. If 
+you are getting cursor attribute errors this is why.
+
+Run describe and frequency reports first and find columns with float values that are very high 
+and exclude them from SQL queries when running Profile Report because it will destroy local memory
+and cause report to break.
+
+In Python do not perform email calls using the email validator it has a DNS calls that are unreliable.
+We cannot use some of the libraries
+
+Fields removed from profile report netsuite customers
+custentity_tp_zi_last_verified
+custentity_annualrevenue
+custentity_bizdev_attempts
+estimatedbudget
+##################
+
+# python data_validation_reporting.py sql_files_replica MDM_Contact__Active.sql MDM_Customer__Active.sql Non_ClosedWon_Address_Phone_and_Email_View.sql Non_Customer_Addresses_View.sql
