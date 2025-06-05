@@ -37,7 +37,7 @@ The framework is driven by configurations defined in Python scripts, primarily `
 
 1.  **Clone the Repository:**
     ```bash
-    git clone <your_repository_url>
+    git clone https://github.com/khai-mle/data-quality-framework.git
     cd eda-dataquality-framework
     ```
 
