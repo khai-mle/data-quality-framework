@@ -13,6 +13,14 @@ from data_cleaning import \
     get_sqlal_dict, db_freq_report_by_column
 import os # Added for CSV development
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Print available tables for debugging
+logging.debug("Available tables in configuration:")
+for table_name in tables.keys():
+    logging.debug(f"  - {table_name}")
+
 # Now using system arguments and the hacky code below doesn't use argparser by sysarg
 # python <script> Logistics_DQPilot_CONTACT.csv Logistics_DQPilotACCOUNT.csv
 
@@ -66,52 +74,44 @@ if not os.path.exists(output_directory):
     #     ch.truncate_replica_table('Exact_Duplicate', 'db_report') # Commented out for CSV development
 
 for csv_file_path in csv_files_to_run: # Loop through CSV files
-
+    logging.debug(f"Starting to process file: {csv_file_path}")
+    
     # SET OUTPUT FILE NAMES BASED ON CSV FILE
-    output_file_name = os.path.splitext(os.path.basename(csv_file_path))[0] # E.g., "Logistics_DQPilot_CONTACT"
+    output_file_name = os.path.splitext(os.path.basename(csv_file_path))[0]
+    logging.debug(f"Output file name: {output_file_name}")
 
-    # GRAB REPLICA FIELDS - This part is database-specific and complex to replicate for CSVs without more info.
-    # We will proceed without a specific dataTypeDict from DB metadata.
-    # Pandas will infer types from CSV. Validation functions might need adjustments if they rely heavily on specific SQLAlchemy types.
     print(f"Processing CSV file: {csv_file_path}")
-    # mapping_file = fd(sql_mapping,sql_mapping_name).file_path() # Commented out
-    # mapping = ch.fetch_data_file(mapping_file) # Commented out
-
-    # table_columns = mapping[(mapping['TABLE_NAME'] == output_file_name)] # Commented out
-    # dataTypeDict = dict(zip(table_columns['COLUMN_NAME'], table_columns['SA_COLUMN_FORMAT1'])) # Commented out
-    dataTypeDict = {} # Initialize empty, as we are not fetching DB types. Some functions might use this.
-
-    # SET SQL FILE TO QUERY # Commented out
-    # file_fp = fd(sql_directory,file).file_path() # Commented out
-
-    # RUN QUERY AND SET TO DATAFRAME
-    # RUN REPORTS SECTION
     try:
         # RUN QUERY AND SET TO DATAFRAME
         print(f"Reading data from: {output_file_name}.csv")
-        # table = ch.fetch_data_file(file_fp) # Commented out
         table = pd.read_csv(csv_file_path)
         print(f"Successfully read {len(table)} rows from {csv_file_path}")
+        logging.debug(f"DataFrame shape: {table.shape}")
 
     except Exception as e:
         logging.error(f"Error creating dataframe from {csv_file_path}", exc_info=e)
         continue
 
-
-    # ALL REPORTS REQUIRE AN ID TO REFERENCE AND WITHOUT IT, WE DON'T RUN REPORTS
-    # Ensure 'output_file_name' (e.g., "Logistics_DQPilot_CONTACT") is a key in your 'tables' dict from table_mapping.py
-    if output_file_name not in tables:
+    # Create a case-insensitive mapping of table names
+    table_mapping = {k.lower().replace('_', ''): k for k in tables.keys()}
+    normalized_output_name = output_file_name.lower().replace('_', '')
+    
+    if normalized_output_name not in table_mapping:
         logging.warning(f"No configuration found for '{output_file_name}' in table_mapping.py. Skipping detailed validations for this file.")
-        # Optionally, run generic profiling or basic checks here if desired
-        # For now, we just skip if no specific mapping config exists
         print(f"Skipping detailed validation for {output_file_name} due to missing configuration in table_mapping.py.")
         continue
-            
-    primary_key = tables[output_file_name]['db_primary_key']
-    reference_fields = tables[output_file_name]['reference_fields']
-    db_table = tables[output_file_name]['db_table']
-    db_schema = tables[output_file_name]['db_schema']
+    
+    actual_table_name = table_mapping[normalized_output_name]
+    logging.debug(f"Found configuration using normalized name: {actual_table_name}")
+    
+    primary_key = tables[actual_table_name]['db_primary_key']
+    reference_fields = tables[actual_table_name]['reference_fields']
+    db_table = tables[actual_table_name]['db_table']
+    db_schema = tables[actual_table_name]['db_schema']
     key_test = len(primary_key)
+
+    # Initialize dataTypeDict as an empty dictionary since we're working with CSV files
+    dataTypeDict = {}
 
     if key_test == 1 and primary_key != None:
 
@@ -122,19 +122,19 @@ for csv_file_path in csv_files_to_run: # Loop through CSV files
             validation_table_fields = primary_key
             base_fields = primary_key
 
-        def_country_field_value = tables[output_file_name]['default_country_field']
-        def_country_code = tables[output_file_name]['default_country_code']
-        hasAddress = tables[output_file_name]['address']['hasAddress']
-        phone = tables[output_file_name]['phone']
-        email = tables[output_file_name]['email']
-        url = tables[output_file_name]['url']
-        name = tables[output_file_name]['name']
-        z_num_outliers = tables[output_file_name]['z_num_outliers']
-        iq_num_outliers = tables[output_file_name]['iq_num_outliers']
-        date_outliers = tables[output_file_name]['date_outliers']
-        duplicates = tables[output_file_name]['duplicates']
-        is_null = tables[output_file_name]['isNull']
-        exception_from_row_validation = tables[output_file_name]['exception_from_row_validation']
+        def_country_field_value = tables[actual_table_name]['default_country_field']
+        def_country_code = tables[actual_table_name]['default_country_code']
+        hasAddress = tables[actual_table_name]['address']['hasAddress']
+        phone = tables[actual_table_name]['phone']
+        email = tables[actual_table_name]['email']
+        url = tables[actual_table_name]['url']
+        name = tables[actual_table_name]['name']
+        z_num_outliers = tables[actual_table_name]['z_num_outliers']
+        iq_num_outliers = tables[actual_table_name]['iq_num_outliers']
+        date_outliers = tables[actual_table_name]['date_outliers']
+        duplicates = tables[actual_table_name]['duplicates']
+        is_null = tables[actual_table_name]['isNull']
+        exception_from_row_validation = tables[actual_table_name]['exception_from_row_validation']
         
         validity_fields = []
         outlier_fields = []
@@ -180,7 +180,7 @@ for csv_file_path in csv_files_to_run: # Loop through CSV files
         if hasAddress:
             print(f"performing address validation")
             address_fields = []
-            addresses = tables[output_file_name]['address']['addresses']
+            addresses = tables[actual_table_name]['address']['addresses']
             keys = sorted([key for key in addresses.keys()])
 
             for add in keys:
@@ -189,7 +189,7 @@ for csv_file_path in csv_files_to_run: # Loop through CSV files
                 # INSTANTIATE ROW LEVEL ANALYSIS. WE ARE CREATING NULL DUMMY COLUMNS
                 # WHEN COLUMN DOESN'T EXIST TO KEEP CODE LIGHT AND NOT EVERY PERMUTATION
                 # THE OLD SOLUTION CREATED LISTS WITH None TO BE A PLACEHOLDER.
-                address = tables[output_file_name]['address']['addresses'][add]
+                address = tables[actual_table_name]['address']['addresses'][add]
                 addr_root_name = address['address_root_name']
 
                 fullAddress = address['full_address']
@@ -371,7 +371,7 @@ for csv_file_path in csv_files_to_run: # Loop through CSV files
 
             # country_col_name = def_country_field # Original problematic line
             # Ensure country_col_name is a string
-            raw_country_col = tables[output_file_name]['default_country_field']
+            raw_country_col = tables[actual_table_name]['default_country_field']
             country_col_name_str = None
             if isinstance(raw_country_col, list):
                 if raw_country_col and raw_country_col != [None]: # Check if list is not empty or just [None]
@@ -387,7 +387,7 @@ for csv_file_path in csv_files_to_run: # Loop through CSV files
             else:
                 # If specific country column is not found or not specified, create a default one
                 default_country_column_label = 'DCountry' # Default column name if actual is not found/specified
-                table[default_country_column_label] = tables[output_file_name]['default_country_code'] if tables[output_file_name]['default_country_code'] else 'US'
+                table[default_country_column_label] = tables[actual_table_name]['default_country_code'] if tables[actual_table_name]['default_country_code'] else 'US'
                 phone_country_col = default_country_column_label
                 if default_country_column_label not in phone_all: phone_all.append(default_country_column_label)
                 if default_country_column_label not in validation_table_fields: validation_table_fields.append(default_country_column_label)

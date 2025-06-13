@@ -66,7 +66,7 @@ def address_cleaning(fullAddress, address1, address2, address3, city, state, zip
             street = f'{address1.split("#",1)[0]}'
             street = street.strip()
             p_suite = f'#{address1.split("#",1)[1]}'
-            if address2 in [np.NaN, None]:
+            if address2 in [np.nan, None]:
                 suite = p_suite
             else:
                 suite = f'{address2} {p_suite}'
@@ -74,7 +74,7 @@ def address_cleaning(fullAddress, address1, address2, address3, city, state, zip
             street = f'{address1.split(",",1)[0]}'
             street = street.strip()
             p_suite = f'#{address1.split(",",1)[1]}'
-            if address2 in [np.NaN, None]:
+            if address2 in [np.nan, None]:
                 suite = p_suite
             else:
                 suite = f'{p_suite} {address2}'            
